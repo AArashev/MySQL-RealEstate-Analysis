@@ -1,0 +1,16 @@
+admin@localhost
+Privileges:
+ALL PRIVILEGES: The admin user has full control over the nashvillehousingdb database. This includes:
+Reading (SELECT), writing (INSERT, UPDATE, DELETE), and modifying the database structure (CREATE, ALTER, DROP).
+Granting privileges to other users.
+
+
+your_user@localhost
+Privileges:
+ALL PRIVILEGES: This user also has full control over the nashvillehousingdb database, just like the admin user.
+USAGE: This is a basic permission that allows the user to connect to the MySQL server but doesn’t provide any additional privileges by itself.
+
+
+ sales_agent@localhost
+Privileges:
+SELECT: The sales_agent user can only read data from the nashvillehousingdb database. This means the user can query tables but cannot insert, update, or delete data, nor can they modify the structure of the database.
