@@ -1,0 +1,130 @@
+# Step 1: Create Database
+CREATE DATABASE IF NOT EXISTS nashville_housing;
+USE nashville_housing;
+
+# Step 2: Create Properties Table
+CREATE TABLE properties (
+    property_id INT AUTO_INCREMENT PRIMARY KEY,
+    parcel_id VARCHAR(50) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    city_id INT,
+    state CHAR(2) NOT NULL,
+    land_use_code INT NOT NULL,
+    acreage_code INT NOT NULL,
+    FOREIGN KEY (city_id) REFERENCES cities(city_id),
+    FOREIGN KEY (land_use_code) REFERENCES land_use_mapping(land_use_code) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (acreage_code) REFERENCES acreage_ranges(acreage_code) ON DELETE CASCADE ON UPDATE CASCADE
+);
+# Explanation: Defines the properties table with references to other tables for normalization.
+
+# Step 3: Create Supporting Tables
+CREATE TABLE land_use_mapping (
+    land_use_code INT PRIMARY KEY,
+    description VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE acreage_ranges (
+    acreage_code INT PRIMARY KEY,
+    range_description VARCHAR(50) NOT NULL,
+    min_acreage FLOAT NOT NULL,
+    max_acreage FLOAT NOT NULL
+);
+
+CREATE TABLE cities (
+    city_id INT AUTO_INCREMENT PRIMARY KEY,
+    city_name VARCHAR(50) NOT NULL
+);
+# Explanation: These tables provide normalized mappings for land use, acreage ranges, and city data.
+
+# Step 4: Populate Mapping Tables
+INSERT INTO land_use_mapping (land_use_code, description)
+VALUES
+    (1, 'SINGLE FAMILY'),
+    (2, 'DUPLEX'),
+    (3, 'TRIPLEX'),
+    (4, 'OTHER');
+
+INSERT INTO acreage_ranges (acreage_code, range_description, min_acreage, max_acreage)
+VALUES
+    (1, '< 0.5 acres', 0.00, 0.50),
+    (2, '0.5–1 acres', 0.51, 1.00),
+    (3, '> 1 acres', 1.01, 9999.99);
+
+INSERT INTO cities (city_name)
+SELECT DISTINCT city FROM database2.nashville_data;
+# Explanation: Inserts normalized data into mapping tables for land use, acreage ranges, and cities.
+
+# Step 5: Assign City IDs to Properties
+ALTER TABLE properties ADD COLUMN city_id INT;
+UPDATE properties p
+JOIN cities c ON p.city = c.city_name
+SET p.city_id = c.city_id;
+ALTER TABLE properties DROP COLUMN city;
+# Explanation: Links the properties table to the cities table using a foreign key.
+
+# Step 6: Insert Data into Properties Table
+INSERT INTO properties (parcel_id, address, city_id, state, land_use_code, acreage_code)
+SELECT DISTINCT
+    parcel_id,
+    address,
+    city_id,
+    state,
+    CASE
+        WHEN land_use = 'SINGLE FAMILY' THEN 1
+        WHEN land_use = 'DUPLEX' THEN 2
+        WHEN land_use = 'TRIPLEX' THEN 3
+        ELSE 4
+    END AS land_use_code,
+    CASE
+        WHEN acreage < 0.5 THEN 1
+        WHEN acreage BETWEEN 0.5 AND 1 THEN 2
+        ELSE 3
+    END AS acreage_code
+FROM database2.nashville_data d
+JOIN cities c ON d.city = c.city_name;
+# Explanation: Normalizes and inserts data from the source table into the properties table.
+
+# Step 7: Create Sales Table
+CREATE TABLE sales (
+    sale_id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT NOT NULL,
+    sale_date DATE NOT NULL,
+    sale_price INT NOT NULL,
+    log_sale_price FLOAT,
+    sold_as_vacant TINYINT,
+    multiple_parcels_involved TINYINT,
+    legal_reference VARCHAR(255),
+    FOREIGN KEY (property_id) REFERENCES properties(property_id)
+);
+# Explanation: Links sales data to properties with a foreign key.
+
+# Step 8: Insert Data into Sales Table
+INSERT INTO sales (property_id, sale_date, sale_price, log_sale_price, sold_as_vacant, multiple_parcels_involved, legal_reference)
+SELECT
+    p.property_id,
+    STR_TO_DATE(d.sale_date, '%m/%d/%Y'),
+    d.sale_price,
+    LOG(1 + d.sale_price),
+    CASE WHEN d.sold_as_vacant = 'Yes' THEN 1 ELSE 0 END,
+    CASE WHEN d.multiple_parcels_involved = 'Yes' THEN 1 ELSE 0 END,
+    d.legal_reference
+FROM database2.nashville_data d
+JOIN properties p ON d.parcel_id = p.parcel_id;
+# Explanation: Inserts normalized sales data with transformations.
+
+# Step 9: Validation Queries
+SELECT p.property_id, p.address, l.description AS land_use, a.range_description AS acreage, c.city_name AS city
+FROM properties p
+LEFT JOIN land_use_mapping l ON p.land_use_code = l.land_use_code
+LEFT JOIN acreage_ranges a ON p.acreage_code = a.acreage_code
+LEFT JOIN cities c ON p.city_id = c.city_id;
+# Explanation: Verifies data integration across properties, land_use_mapping, acreage_ranges, and cities.
+
+# Step 10: Constraints and Indexes
+ALTER TABLE properties ADD CONSTRAINT fk_land_use_code FOREIGN KEY (land_use_code) REFERENCES land_use_mapping (land_use_code) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE properties ADD CONSTRAINT fk_acreage_code FOREIGN KEY (acreage_code) REFERENCES acreage_ranges (acreage_code) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE properties ADD CONSTRAINT fk_city_id FOREIGN KEY (city_id) REFERENCES cities (city_id);
+CREATE INDEX idx_parcel_id ON properties(parcel_id);
+CREATE INDEX idx_land_use_code ON properties(land_use_code);
+CREATE INDEX idx_acreage_code ON properties(acreage_code);
+# Explanation: Adds constraints and indexes for optimization and data integrity.
