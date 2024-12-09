@@ -1,5 +1,7 @@
 ![Diagram 1](https://github.com/user-attachments/assets/610db20f-abd6-431e-ba4b-016535d7897c)
-Nashville Housing Data Insights and Predictive Analytics Repository
+
+##Nashville Housing Data Insights and Predictive Analytics Repository
+
 Project Overview
 This repository contains a comprehensive data analytics project to provide insights into the Nashville housing market. Using machine learning algorithms, it integrates real estate transaction data, valuation metrics, and predictive modeling. The repository is built to support real estate professionals, investors, and researchers in analyzing market trends, forecasting property prices, and identifying investment opportunities.
 
@@ -18,7 +20,7 @@ Visualization:
 Tableau dashboards to visualize trends, predictions, and neighborhood-level analyses.
 Database Design:
 
-Relational database structure built with MySQL, including normalized tables and metadata fields.
+A relational database structure was built with MySQL, including normalized tables and metadata fields.
 Repository Contents
 SQL Scripts:
 
@@ -53,9 +55,8 @@ SHAP Feature Importance: Shows the key factors influencing property sale prices.
 Price Trends by Year Built: Analyzes price changes based on property age.
 How to Use the Repository
 Clone the repository:
-bash
-Copy code
 git clone https://github.com/AArashev/MySQL-RealEstate-Analysis
+
 Set up the MySQL database using the provided SQL scripts.
 Use the Python scripts to preprocess data, train models, and update predictions in the database.
 Explore insights through the Tableau dashboards or execute SQL queries for custom analyses.
