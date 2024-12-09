@@ -1,11 +1,11 @@
 ![Diagram 1](https://github.com/user-attachments/assets/610db20f-abd6-431e-ba4b-016535d7897c)
 
-##Nashville Housing Data Insights and Predictive Analytics Repository
+**Nashville Housing Data Insights and Predictive Analytics Repository**
 
-Project Overview
+**Project Overview**
 This repository contains a comprehensive data analytics project to provide insights into the Nashville housing market. Using machine learning algorithms, it integrates real estate transaction data, valuation metrics, and predictive modeling. The repository is built to support real estate professionals, investors, and researchers in analyzing market trends, forecasting property prices, and identifying investment opportunities.
 
-Key Features
+**Key Features**
 Data Integration:
 
 Real estate transaction data (sales, valuations, features, ownership).
@@ -35,7 +35,7 @@ Visualization Files:
 Tableau dashboards for exploring property trends and market insights.
 EER Diagram:
 
-Entity-Relationship Diagram for database schema.
+**Entity-Relationship Diagram for database schema.**
 Database Schema
 The database includes the following key tables:
 
